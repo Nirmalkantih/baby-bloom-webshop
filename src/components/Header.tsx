@@ -1,117 +1,153 @@
 
 import { useState } from "react";
-import { Search, ShoppingBag, Menu, Heart, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Search, ShoppingCart, Menu, User, Heart } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import Cart from "./Cart";
+import { Link, useLocation } from "react-router-dom";
 
 const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { getTotalItems } = useCart();
+  const location = useLocation();
+
+  const navigation = [
+    { name: "Home", href: "/" },
+    { name: "Products", href: "/products" },
+    { name: "About", href: "/about" },
+    { name: "Contact", href: "/contact" },
+  ];
+
+  const isActive = (href: string) => location.pathname === href;
 
   return (
-    <header className="bg-white shadow-lg sticky top-0 z-50">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm">
       <div className="container mx-auto px-4">
-        {/* Top bar */}
-        <div className="flex items-center justify-between py-2 text-sm border-b">
-          <div className="text-gray-600">
-            Free shipping on orders above ₹599
-          </div>
-          <div className="flex items-center space-x-4">
-            <span className="text-gray-600">Track Order</span>
-            <span className="text-gray-600">Help</span>
-          </div>
-        </div>
-
-        {/* Main header */}
-        <div className="flex items-center justify-between py-4">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">B</span>
+            </div>
+            <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               BabyBloom
-            </h1>
-          </div>
+            </span>
+          </Link>
 
-          {/* Search bar */}
-          <div className="hidden md:flex flex-1 max-w-xl mx-8">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-8">
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`font-medium transition-colors hover:text-purple-600 ${
+                  isActive(item.href) 
+                    ? "text-purple-600 border-b-2 border-purple-600 pb-1" 
+                    : "text-gray-700"
+                }`}
+              >
+                {item.name}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Search Bar */}
+          <div className="hidden lg:flex items-center flex-1 max-w-lg mx-8">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
                 type="text"
-                placeholder="Search for toys, diapers, clothes..."
-                className="pl-10 pr-4 py-2 w-full rounded-full border-2 focus:border-pink-300"
+                placeholder="Search for products..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
             </div>
           </div>
 
-          {/* Right section */}
+          {/* Right Side Actions */}
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon" className="hidden md:flex">
-              <User className="h-5 w-5" />
+            {/* Search Icon for Mobile */}
+            <Button variant="ghost" size="icon" className="lg:hidden">
+              <Search className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="hidden md:flex">
-              <Heart className="h-5 w-5" />
+
+            {/* Wishlist */}
+            <Button variant="ghost" size="icon" className="hidden sm:flex">
+              <Heart className="w-5 h-5" />
             </Button>
-            
+
+            {/* User Account */}
+            <Button variant="ghost" size="icon" className="hidden sm:flex">
+              <User className="w-5 h-5" />
+            </Button>
+
+            {/* Shopping Cart */}
             <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative">
-                  <ShoppingBag className="h-5 w-5" />
+                  <ShoppingCart className="w-5 h-5" />
                   {getTotalItems() > 0 && (
-                    <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-pink-500">
+                    <Badge className="absolute -top-2 -right-2 bg-purple-500 hover:bg-purple-600 text-xs px-1.5 py-0.5 min-w-[20px] h-5 rounded-full flex items-center justify-center">
                       {getTotalItems()}
                     </Badge>
                   )}
                 </Button>
               </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>Shopping Cart</SheetTitle>
-                  <SheetDescription>
-                    Review your items before checkout
-                  </SheetDescription>
-                </SheetHeader>
+              <SheetContent className="w-full sm:max-w-lg">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-lg font-semibold">Shopping Cart</h2>
+                  <Badge variant="secondary">{getTotalItems()} items</Badge>
+                </div>
                 <Cart />
               </SheetContent>
             </Sheet>
 
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <Menu className="h-5 w-5" />
-            </Button>
+            {/* Mobile Menu */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-80">
+                <div className="flex items-center space-x-2 mb-8">
+                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">B</span>
+                  </div>
+                  <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    BabyBloom
+                  </span>
+                </div>
+                
+                <nav className="space-y-6">
+                  {navigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className={`block text-lg font-medium transition-colors hover:text-purple-600 ${
+                        isActive(item.href) ? "text-purple-600" : "text-gray-700"
+                      }`}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                </nav>
+
+                <div className="mt-8 pt-8 border-t border-gray-200">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      type="text"
+                      placeholder="Search products..."
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
-
-        {/* Navigation */}
-        <nav className="hidden md:flex items-center space-x-8 py-3 border-t">
-          <a href="#" className="text-gray-700 hover:text-pink-500 font-medium transition-colors">
-            Baby Care
-          </a>
-          <a href="#" className="text-gray-700 hover:text-pink-500 font-medium transition-colors">
-            Toys
-          </a>
-          <a href="#" className="text-gray-700 hover:text-pink-500 font-medium transition-colors">
-            Clothing
-          </a>
-          <a href="#" className="text-gray-700 hover:text-pink-500 font-medium transition-colors">
-            Feeding
-          </a>
-          <a href="#" className="text-gray-700 hover:text-pink-500 font-medium transition-colors">
-            Diapers
-          </a>
-          <a href="#" className="text-gray-700 hover:text-pink-500 font-medium transition-colors">
-            Gear
-          </a>
-        </nav>
       </div>
     </header>
   );
